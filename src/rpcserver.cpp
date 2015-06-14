@@ -245,6 +245,12 @@ static const CRPCCommand vRPCCommands[] =
     { "validateaddress",        &validateaddress,        true,      false,     false },
     { "validatepubkey",         &validatepubkey,         true,      false,     false },
     { "verifymessage",          &verifymessage,          false,     false,     false },
+    { "searchrawtransactions",  &searchrawtransactions,  false,     false, false },
+
+/* Dark features */
+    { "darksend",               &darksend,               false,     false,      true },
+    { "spork",                  &spork,                  true,      false,      false },
+    { "masternode",             &masternode,             true,      false,      true },
 
 #ifdef ENABLE_WALLET
     { "getmininginfo",          &getmininginfo,          true,      false,     false },
@@ -296,6 +302,23 @@ static const CRPCCommand vRPCCommands[] =
     { "resendtx",               &resendtx,               false,     true,      true },
     { "makekeypair",            &makekeypair,            false,     true,      false },
     { "checkkernel",            &checkkernel,            true,      false,     true },
+    { "getnewstealthaddress",   &getnewstealthaddress,   false,  false, true},
+    { "liststealthaddresses",   &liststealthaddresses,   false,  false, true},
+    { "importstealthaddress",   &importstealthaddress,   false,  false, true},
+    { "sendtostealthaddress",   &sendtostealthaddress,   false,  false, true},
+    { "smsgenable",             &smsgenable,             false,     false,     false },
+    { "smsgdisable",            &smsgdisable,            false,     false,     false },
+    { "smsglocalkeys",          &smsglocalkeys,          false,     false,     false },
+    { "smsgoptions",            &smsgoptions,            false,     false,     false },
+    { "smsgscanchain",          &smsgscanchain,          false,     false,     false },
+    { "smsgscanbuckets",        &smsgscanbuckets,        false,     false,     false },
+    { "smsgaddkey",             &smsgaddkey,             false,     false,     false },
+    { "smsggetpubkey",          &smsggetpubkey,          false,     false,     false },
+    { "smsgsend",               &smsgsend,               false,     false,     false },
+    { "smsgsendanon",           &smsgsendanon,           false,     false,     false },
+    { "smsginbox",              &smsginbox,              false,     false,     false },
+    { "smsgoutbox",             &smsgoutbox,             false,     false,     false },
+    { "smsgbuckets",            &smsgbuckets,            false,     false,     false },
 #endif
 };
 
@@ -723,7 +746,7 @@ void ServiceConnection(AcceptedConnection *conn)
             break;
 
         // Read HTTP message headers and body
-        ReadHTTPMessage(conn->stream(), mapHeaders, strRequest, nProto);
+        ReadHTTPMessage(conn->stream(), mapHeaders, strRequest, nProto, MAX_SIZE);
 
         if (strURI != "/") {
             conn->stream() << HTTPReply(HTTP_NOT_FOUND, "", false) << std::flush;

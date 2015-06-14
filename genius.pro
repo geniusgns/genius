@@ -1,8 +1,8 @@
 TEMPLATE = app
 TARGET = genius-qt
-VERSION = 1.0.0.0
-INCLUDEPATH += src src/json src/qt
-QT += network
+VERSION = 1.1.0.0
+INCLUDEPATH += src src/json src/qt src/qt/plugins/mrichtexteditor
+QT += network printsupport
 DEFINES += ENABLE_WALLET
 DEFINES += BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
@@ -11,6 +11,11 @@ CONFIG += thread
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT += widgets
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
+}
+
+linux {
+    SECP256K1_LIB_PATH = /usr/local/lib
+    SECP256K1_INCLUDE_PATH = /usr/local/include
 }
 
 # for boost 1.37, add -mt to the boost libraries
@@ -46,7 +51,7 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 # This can be enabled for Windows, when we switch to MinGW >= 4.4.x.
 }
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
-win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
+win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat -static
 win32:QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 
 # use: qmake "USE_QRCODE=1"
@@ -88,6 +93,9 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     DEFINES += BITCOIN_NEED_QT_PLUGINS
     QTPLUGIN += qcncodecs qjpcodecs qtwcodecs qkrcodecs qtaccessiblewidgets
 }
+
+# LIBSEC256K1 SUPPORT
+QMAKE_CXXFLAGS *= -DUSE_SECP256K1
 
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
 LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a
@@ -165,20 +173,20 @@ HEADERS += src/qt/bitcoingui.h \
     src/hash.h \
     src/uint256.h \
     src/kernel.h \
-    src/scrypt.h \
     src/pbkdf2.h \
     src/serialize.h \
     src/core.h \
     src/main.h \
     src/miner.h \
-    src/irc.h \
     src/net.h \
     src/key.h \
+    src/eckey.h \
     src/db.h \
     src/txdb.h \
     src/txmempool.h \
     src/walletdb.h \
     src/script.h \
+    src/scrypt.h \
     src/init.h \
     src/mruset.h \
     src/json/json_spirit_writer_template.h \
@@ -227,7 +235,35 @@ HEADERS += src/qt/bitcoingui.h \
     src/netbase.h \
     src/clientversion.h \
     src/threadsafety.h \
-    src/tinyformat.h
+    src/tinyformat.h \
+    src/stealth.h \
+    src/qt/flowlayout.h \
+    src/qt/darksendconfig.h \
+    src/masternode.h \
+    src/darksend.h \
+    src/instantx.h \
+    src/activemasternode.h \
+    src/spork.h \
+    src/crypto/common.h \
+    src/crypto/hmac_sha256.h \
+    src/crypto/hmac_sha512.h \
+    src/crypto/rfc6979_hmac_sha256.h \
+    src/crypto/ripemd160.h \
+    src/crypto/sha1.h \
+    src/crypto/sha256.h \
+    src/crypto/sha512.h \
+    src/eccryptoverify.h \
+    src/qt/masternodemanager.h \
+    src/qt/addeditadrenalinenode.h \
+    src/qt/adrenalinenodeconfigdialog.h \
+    src/qt/qcustomplot.h \
+    src/smessage.h \
+    src/qt/messagepage.h \
+    src/qt/messagemodel.h \
+    src/qt/sendmessagesdialog.h \
+    src/qt/sendmessagesentry.h \
+    src/qt/plugins/mrichtexteditor/mrichtextedit.h \
+    src/qt/qvalidatedtextedit.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -250,12 +286,16 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/hash.cpp \
     src/netbase.cpp \
     src/key.cpp \
+    src/eckey.cpp \
     src/script.cpp \
+    src/scrypt-arm.S \
+    src/scrypt-x86.S \
+    src/scrypt-x86_64.S \
+    src/scrypt.cpp \
     src/core.cpp \
     src/main.cpp \
     src/miner.cpp \
     src/init.cpp \
-    src/irc.cpp \
     src/net.cpp \
     src/checkpoints.cpp \
     src/addrman.cpp \
@@ -301,11 +341,38 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/noui.cpp \
     src/kernel.cpp \
-    src/scrypt-arm.S \
-    src/scrypt-x86.S \
-    src/scrypt-x86_64.S \
-    src/scrypt.cpp \
-    src/pbkdf2.cpp
+    src/pbkdf2.cpp \
+    src/stealth.cpp \
+    src/qt/flowlayout.cpp \
+    src/qt/darksendconfig.cpp \
+    src/masternode.cpp \
+    src/darksend.cpp \
+    src/rpcdarksend.cpp \
+    src/instantx.cpp \
+    src/activemasternode.cpp \
+    src/spork.cpp \
+    src/masternodeconfig.cpp \
+    src/crypto/hmac_sha256.cpp \
+    src/crypto/hmac_sha512.cpp \
+    src/crypto/rfc6979_hmac_sha256.cpp \
+    src/crypto/ripemd160.cpp \
+    src/crypto/sha1.cpp \
+    src/crypto/sha256.cpp \
+    src/crypto/sha512.cpp \
+    src/eccryptoverify.cpp \
+    src/qt/masternodemanager.cpp \
+    src/qt/addeditadrenalinenode.cpp \
+    src/qt/adrenalinenodeconfigdialog.cpp \
+    src/qt/qcustomplot.cpp \
+    src/smessage.cpp \
+    src/qt/messagepage.cpp \
+    src/qt/messagemodel.cpp \
+    src/qt/sendmessagesdialog.cpp \
+    src/qt/sendmessagesentry.cpp \
+    src/qt/qvalidatedtextedit.cpp \
+    src/qt/plugins/mrichtexteditor/mrichtextedit.cpp \
+    src/rpcsmessage.cpp
+
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -322,7 +389,15 @@ FORMS += \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
-    src/qt/forms/optionsdialog.ui
+    src/qt/forms/optionsdialog.ui \
+    src/qt/forms/darksendconfig.ui \
+    src/qt/forms/masternodemanager.ui \
+    src/qt/forms/addeditadrenalinenode.ui \
+    src/qt/forms/adrenalinenodeconfigdialog.ui \
+    src/qt/forms/messagepage.ui \
+    src/qt/forms/sendmessagesentry.ui \
+    src/qt/forms/sendmessagesdialog.ui \
+    src/qt/plugins/mrichtexteditor/mrichtextedit.ui 
 
 contains(USE_QRCODE, 1) {
 HEADERS += src/qt/qrcodedialog.h
@@ -410,11 +485,12 @@ macx:QMAKE_CXXFLAGS_THREAD += -pthread
 macx:QMAKE_INFO_PLIST = share/qt/Info.plist
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
-INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
-LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
+INCLUDEPATH += $$SECP256K1_INCLUDE_PATH $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
+LIBS += $$join(SECP256K1_LIB_PATH,,-L,) $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
 LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
 # -lgdi32 has to happen after -lcrypto (see  #681)
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock -lole32 -loleaut32 -luuid -lgdi32
+LIBS += -lsecp256k1
 LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX
 windows:LIBS += -lboost_chrono$$BOOST_LIB_SUFFIX
 

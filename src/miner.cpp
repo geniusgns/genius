@@ -7,6 +7,8 @@
 #include "txdb.h"
 #include "miner.h"
 #include "kernel.h"
+#include "masternode.h"
+
 
 using namespace std;
 
@@ -160,12 +162,13 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, bool fProofOfStake, int64_t* pFe
 
     pblock->nBits = GetNextTargetRequired(pindexPrev, fProofOfStake);
 
+
     // Collect memory pool transactions into the block
     int64_t nFees = 0;
     {
         LOCK2(cs_main, mempool.cs);
         CTxDB txdb("r");
-
+//>GENIUS<
         // Priority order to process transactions
         list<COrphan> vOrphan; // list memory doesn't move
         map<uint256, vector<COrphan*> > mapDependers;
@@ -353,7 +356,7 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, bool fProofOfStake, int64_t* pFe
 
         if (fDebug && GetBoolArg("-printpriority", false))
             LogPrintf("CreateNewBlock(): total size %u\n", nBlockSize);
-
+// >GENIUS<
         if (!fProofOfStake)
             pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(nFees);
 
@@ -545,10 +548,16 @@ void ThreadStakeMiner(CWallet *pwallet)
             fTryToSync = false;
             if (vNodes.size() < 3 || pindexBest->GetBlockTime() < GetTime() - 10 * 60)
             {
-                MilliSleep(60000);
+                MilliSleep(10000);
                 continue;
             }
         }
+
+	if (fMasterNode)
+	{
+	    MilliSleep(10000);
+	    continue;
+	}
 
         //
         // Create new block

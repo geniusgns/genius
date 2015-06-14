@@ -160,6 +160,8 @@ extern json_spirit::Value validatepubkey(const json_spirit::Array& params, bool 
 extern json_spirit::Value getnewpubkey(const json_spirit::Array& params, bool fHelp);
 
 extern json_spirit::Value getrawtransaction(const json_spirit::Array& params, bool fHelp); // in rcprawtransaction.cpp
+extern json_spirit::Value searchrawtransactions(const json_spirit::Array& params, bool fHelp);
+
 extern json_spirit::Value listunspent(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value createrawtransaction(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decoderawtransaction(const json_spirit::Array& params, bool fHelp);
@@ -177,4 +179,26 @@ extern json_spirit::Value getblock(const json_spirit::Array& params, bool fHelp)
 extern json_spirit::Value getblockbynumber(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getcheckpoint(const json_spirit::Array& params, bool fHelp);
 
+extern json_spirit::Value getnewstealthaddress(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value liststealthaddresses(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value importstealthaddress(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendtostealthaddress(const json_spirit::Array& params, bool fHelp);
+
+extern json_spirit::Value darksend(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value spork(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value masternode(const json_spirit::Array& params, bool fHelp);
+
+extern json_spirit::Value smsgenable(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgdisable(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsglocalkeys(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgoptions(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgscanchain(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgscanbuckets(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgaddkey(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsggetpubkey(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgsend(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgsendanon(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsginbox(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgoutbox(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value smsgbuckets(const json_spirit::Array& params, bool fHelp);
 #endif

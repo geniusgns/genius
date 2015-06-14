@@ -57,6 +57,7 @@ public:
         nRPCPort = 32222;
         bnProofOfWorkLimit = CBigNum(~uint256(0) >> 16);
 
+
         // Build the genesis block. Note that the output of the genesis coinbase cannot
         // be spent as it did not originally exist in the database.
         //
@@ -84,10 +85,6 @@ public:
 
         assert(hashGenesisBlock == uint256("0x0000b17c2900f27ed9cbe5f59373cd6d83d3791c2066a39d59a838801f8d2401"));
         assert(genesis.hashMerkleRoot == uint256("0x67d4e46e07afb6bb43cc6b9ddbf9511e80db13797a595db8033eef2940fcf886"));
-
-        
-
-       
         
         base58Prefixes[PUBKEY_ADDRESS] = list_of(3);
         base58Prefixes[SCRIPT_ADDRESS] = list_of(85);

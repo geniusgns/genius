@@ -36,7 +36,7 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
 
 #if QT_VERSION >= 0x040700
     /* Do not move this to the XML file, Qt before 4.7 will choke on it */
-    ui->lineEditCoinControlChange->setPlaceholderText(tr("Enter a Genius address (e.g. 2QWdyivSRQqcHJA9WRVmMi6hxJ7vxfYXrY)"));
+    ui->lineEditCoinControlChange->setPlaceholderText(tr("Enter a Genius address (e.g. 2XfvvXkSpTAJNP8CjtUgo9YV2M7pDxinKc)"));
 #endif
 
     addEntry();
@@ -94,8 +94,8 @@ void SendCoinsDialog::setModel(WalletModel *model)
             }
         }
 
-        setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance());
-        connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64)));
+        setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance(), model->getAnonymizedBalance());
+        connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64, qint64)));
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
 
         // Coin Control
@@ -212,6 +212,11 @@ void SendCoinsDialog::on_sendButton_clicked()
     case WalletModel::TransactionCommitFailed:
         QMessageBox::warning(this, tr("Send Coins"),
             tr("Error: The transaction was rejected. This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here."),
+            QMessageBox::Ok, QMessageBox::Ok);
+        break;
+    case WalletModel::NarrationTooLong:
+        QMessageBox::warning(this, tr("Send Coins"),
+            tr("Error: Narration is too long."),
             QMessageBox::Ok, QMessageBox::Ok);
         break;
     case WalletModel::Aborted: // User aborted, nothing to do
@@ -346,11 +351,12 @@ bool SendCoinsDialog::handleURI(const QString &uri)
     return false;
 }
 
-void SendCoinsDialog::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance)
+void SendCoinsDialog::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance, qint64 anonymizedBalance)
 {
     Q_UNUSED(stake);
     Q_UNUSED(unconfirmedBalance);
     Q_UNUSED(immatureBalance);
+    Q_UNUSED(anonymizedBalance);
 
     if(model && model->getOptionsModel())
     {
@@ -360,7 +366,7 @@ void SendCoinsDialog::setBalance(qint64 balance, qint64 stake, qint64 unconfirme
 
 void SendCoinsDialog::updateDisplayUnit()
 {
-    setBalance(model->getBalance(), 0, 0, 0);
+    setBalance(model->getBalance(), 0, 0, 0, 0);
 }
 
 // Coin Control: copy label "Quantity" to clipboard
