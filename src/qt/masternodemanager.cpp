@@ -419,7 +419,7 @@ void MasternodeManager::on_localButton_clicked()
     CWalletTx wtx;
     std::string sNarr;
 
-    string strError = pwalletMain->SendMoneyToDestination(CBitcoinAddress(account.vchPubKey.GetID()).Get(), 5000*COIN, sNarr, wtx);
+    string strError = pwalletMain->SendMoneyToDestination(CBitcoinAddress(account.vchPubKey.GetID()).Get(), 5000000*COIN, sNarr, wtx);
     if (strError != "")
     {
 	QMessageBox msg;
