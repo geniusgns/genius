@@ -45,6 +45,9 @@
         <file alias="staking_on">res/icons/staking_on.png</file>
         <file alias="onion">res/icons/onion.png</file>
         <file alias="onionblack">res/icons/onion-black.png</file>
+        <file alias="ccex">res/icons/ccex.png</file>
+        <file alias="websi">res/icons/websi.png</file>
+        <file alias="blockex">res/icons/blockex.png</file>
     </qresource>
     <qresource prefix="/icons/black">
         <file alias="connect_0">res/icons/black/connect0_16.png</file>

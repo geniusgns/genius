@@ -106,6 +106,9 @@ private:
     QAction *openRPCConsoleAction;
     QAction *masternodeManagerAction;
     QAction *messageAction;
+    QAction *blockExplorerAction;
+    QAction *websiteAction;
+    QAction *ccexAction;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
@@ -170,6 +173,9 @@ private slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+    void openBlockExplorer();
+    void openWebsite();
+    void openCcex();
 
     void gotoMasternodeManagerPage();
 

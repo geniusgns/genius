@@ -88,7 +88,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     prevBlocks(0),
     nWeight(0)
 {
-    resize(600, 450);
+    resize(750, 600);
     setWindowTitle(tr("Genius") + " - " + tr("Wallet"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
@@ -292,6 +292,22 @@ void BitcoinGUI::createActions()
     messageAction->setCheckable(true);
     tabGroup->addAction(messageAction);
 
+    blockExplorerAction = new QAction(QIcon(":/icons/blockex"), tr("&&Block Explorer"), this);
+    blockExplorerAction->setToolTip(tr("Go to the Blocktree explorer"));
+
+
+
+    websiteAction = new QAction(QIcon(":/icons/websi"), tr("&&Website"), this);
+    websiteAction->setToolTip(tr("Go to the Geniuscoin Website"));
+
+
+
+    ccexAction = new QAction(QIcon(":/icons/ccex"), tr("&&Exchange"), this);
+    ccexAction->setToolTip(tr("Go to a GENI exchange"));
+
+
+
+
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -306,6 +322,9 @@ void BitcoinGUI::createActions()
     connect(masternodeManagerAction, SIGNAL(triggered()), this, SLOT(gotoMasternodeManagerPage()));
     connect(messageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(messageAction, SIGNAL(triggered()), this, SLOT(gotoMessagePage()));
+    connect(blockExplorerAction, SIGNAL(triggered()), this, SLOT(openBlockExplorer()));
+    connect(websiteAction, SIGNAL(triggered()), this, SLOT(openWebsite()));
+    connect(ccexAction, SIGNAL(triggered()), this, SLOT(openCcex()));
 
     quitAction = new QAction(tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -417,6 +436,9 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(addressBookAction);
     toolbar->addAction(masternodeManagerAction);
     toolbar->addAction(messageAction);
+    toolbar->addAction(blockExplorerAction);
+    toolbar->addAction(websiteAction);
+    toolbar->addAction(ccexAction);
 
     QWidget *spacer = makeToolBarSpacer();
     toolbar->addWidget(spacer);
@@ -895,6 +917,25 @@ void BitcoinGUI::gotoSendCoinsPage()
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
+
+void BitcoinGUI::openBlockExplorer()
+
+{
+    QDesktopServices::openUrl(QUrl("http://www.blocktree.io/e/GENIUS"));
+}
+
+
+void BitcoinGUI::openWebsite()
+{
+    QDesktopServices::openUrl(QUrl("http://geniuscoin.co"));
+}
+
+void BitcoinGUI::openCcex()
+{
+    QDesktopServices::openUrl(QUrl("https://c-cex.com/?p=geni-btc"));
+}
+
+
 
 void BitcoinGUI::gotoSignMessageTab(QString addr)
 {
