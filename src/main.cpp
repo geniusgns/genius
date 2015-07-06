@@ -46,7 +46,8 @@ CBigNum bnProofOfStakeLimitV2(~uint256(0) >> 20);
 unsigned int nStakeMinAge = 16 * 60 * 60; // 16 hours
 unsigned int nModifierInterval = 8 * 60; // time to elapse before new modifier is computed
 
-int nCoinbaseMaturity = 990;
+int nCoinbaseMaturityOld = 990;
+int nCoinbaseMaturity = 188;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 
@@ -929,7 +930,10 @@ int CMerkleTx::GetBlocksToMaturity() const
 {
     if (!(IsCoinBase() || IsCoinStake()))
         return 0;
-    return max(0, (nCoinbaseMaturity+1) - GetDepthInMainChain());
+    if (IsNewMaturity(pindexBest->nHeight))
+        return max(0, (nCoinbaseMaturity+1) - GetDepthInMainChain());
+    else
+        return max(0, (nCoinbaseMaturityOld+1) - GetDepthInMainChain());
 }
 
 
@@ -1479,6 +1483,9 @@ int64_t CTransaction::GetValueIn(const MapPrevTx& inputs) const
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, const CDiskTxPos& posThisTx,
     const CBlockIndex* pindexBlock, bool fBlock, bool fMiner, unsigned int flags, bool fValidateSig)
 {
+     if (!IsNewMaturity(pindexBest->nHeight)) {
+         nCoinbaseMaturity = nCoinbaseMaturityOld;
+     }
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
     // fMiner is true when called from the internal bitcoin miner
@@ -2834,32 +2841,37 @@ static filesystem::path BlockFilePath(unsigned int nFile)
     return GetDataDir() / strBlockFn;
 }
 
-FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
+static unsigned int nCurrentBlockFile = 1;
+
+FILE* OpenBlockFile(bool fHeaderFile, unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
 {
     if ((nFile < 1) || (nFile == (unsigned int) -1))
         return NULL;
-    FILE* file = fopen(BlockFilePath(nFile).string().c_str(), pszMode);
+    
+    string strBlockFn = strprintf(fHeaderFile ? "blk_hdr%04u.dat": "blk%04u.dat", nFile);
+    FILE* file = fopen((GetDataDir() / strBlockFn).string().c_str(), pszMode);
     if (!file)
         return NULL;
+    
     if (nBlockPos != 0 && !strchr(pszMode, 'a') && !strchr(pszMode, 'w'))
     {
         if (fseek(file, nBlockPos, SEEK_SET) != 0)
         {
             fclose(file);
             return NULL;
-        }
-    }
+        };
+    };
     return file;
 }
 
-static unsigned int nCurrentBlockFile = 1;
-
-FILE* AppendBlockFile(unsigned int& nFileRet)
+FILE* AppendBlockFile(bool fHeaderFile, unsigned int& nFileRet, const char* fmode)
 {
     nFileRet = 0;
     while (true)
     {
-        FILE* file = OpenBlockFile(nCurrentBlockFile, 0, "ab");
+        FILE* file = OpenBlockFile(fHeaderFile, nCurrentBlockFile,
+            0, fmode);
+        
         if (!file)
             return NULL;
         if (fseek(file, 0, SEEK_END) != 0)
@@ -2869,10 +2881,11 @@ FILE* AppendBlockFile(unsigned int& nFileRet)
         {
             nFileRet = nCurrentBlockFile;
             return file;
-        }
+        };
+        
         fclose(file);
         nCurrentBlockFile++;
-    }
+    };
 }
 
 bool LoadBlockIndex(bool fAllowNew)
