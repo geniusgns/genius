@@ -46,8 +46,6 @@ CBigNum bnProofOfStakeLimitV2(~uint256(0) >> 20);
 unsigned int nStakeMinAge = 16 * 60 * 60; // 16 hours
 unsigned int nModifierInterval = 8 * 60; // time to elapse before new modifier is computed
 
-int nCoinbaseMaturityOld = 990;
-int nCoinbaseMaturity = 188;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 
@@ -930,10 +928,7 @@ int CMerkleTx::GetBlocksToMaturity() const
 {
     if (!(IsCoinBase() || IsCoinStake()))
         return 0;
-    if (IsNewMaturity(pindexBest->nHeight))
-        return max(0, (nCoinbaseMaturity+1) - GetDepthInMainChain());
-    else
-        return max(0, (nCoinbaseMaturityOld+1) - GetDepthInMainChain());
+    return max(0, (nCoinbaseMaturity(nBestHeight)+1) - GetDepthInMainChain());
 }
 
 
@@ -1483,9 +1478,6 @@ int64_t CTransaction::GetValueIn(const MapPrevTx& inputs) const
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, const CDiskTxPos& posThisTx,
     const CBlockIndex* pindexBlock, bool fBlock, bool fMiner, unsigned int flags, bool fValidateSig)
 {
-     if (!IsNewMaturity(pindexBest->nHeight)) {
-         nCoinbaseMaturity = nCoinbaseMaturityOld;
-     }
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
     // fMiner is true when called from the internal bitcoin miner
@@ -1506,7 +1498,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
 
             // If prev is coinbase or coinstake, check that it's matured
             if (txPrev.IsCoinBase() || txPrev.IsCoinStake())
-                for (const CBlockIndex* pindex = pindexBlock; pindex && pindexBlock->nHeight - pindex->nHeight < nCoinbaseMaturity; pindex = pindex->pprev)
+                for (const CBlockIndex* pindex = pindexBlock; pindex && pindexBlock->nHeight - pindex->nHeight < nCoinbaseMaturity(nBestHeight); pindex = pindex->pprev)
                     if (pindex->nBlockPos == txindex.pos.nBlockPos && pindex->nFile == txindex.pos.nFile)
                         return error("ConnectInputs() : tried to spend %s at depth %d", txPrev.IsCoinBase() ? "coinbase" : "coinstake", pindexBlock->nHeight - pindex->nHeight);
 
@@ -2895,7 +2887,7 @@ bool LoadBlockIndex(bool fAllowNew)
     if (TestNet())
     {
         nStakeMinAge = 1 * 60 * 60; // test net min age is 1 hour
-        nCoinbaseMaturity = 10; // test maturity is 10 blocks
+        //nCoinbaseMaturity(nBestHeight) = 10; // test maturity is 10 blocks
     }
 
     //
